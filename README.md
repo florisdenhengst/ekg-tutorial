@@ -30,6 +30,12 @@ This repository contains Jupyter notebooks that showcase how to turn dialogue in
     python -m ipykernel install --name=ekg-tutorial
     ```
 
+2. to install the nltk packages:
+
+   ```bash
+   python -m nltk.downloader popular
+   ```
+
 ### Usage
 
 You may run any of the notebooks by launching the Jupyter Notebook interface:
@@ -37,6 +43,15 @@ You may run any of the notebooks by launching the Jupyter Notebook interface:
    ```bash
    jupyter notebook 
    ```
+
+### ChatGPT integration
+Create an OpenAI account, an [API key](https://platform.openai.com/docs/quickstart) and make it accessible.
+You can make the API key accessible for this project by storing it in a `.venv` file in the root of this directory:
+
+   ```bash
+   cat "OPENAI_API_KEY=<YOUR_API_KEY>" >> .venv 
+   ```
+
 
 ## Contributing
 
