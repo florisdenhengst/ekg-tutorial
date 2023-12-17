@@ -4,3 +4,4 @@ cltl.entity_linking==0.0.dev1
 cltl.triple-extraction==2.0.dev1
 requests==2.31.0
 notebook==7.0.4
+openai==1.3.7
