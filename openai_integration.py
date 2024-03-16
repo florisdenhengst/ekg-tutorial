@@ -25,7 +25,6 @@ from openai.types.beta.threads import ThreadMessage
 from typing import List
 import time
 
-
 class User(object):
     def __init__(
         self,
@@ -51,14 +50,16 @@ def format_message(message: ThreadMessage) -> str:
     """
     Returns a formatted version of a message.
     """
-    text_content = "\n".join([c.text.value for c in message.content])
+    lines = [c.text.value.strip() for c in message.content]
+    lines = [l.replace("\n\n", "\n") for l in lines if l != ""]
+    text_content = "\n".join(lines)
     return f"{message.role}: {text_content}"
 
 
 # Create OpenAI client
 client = OpenAI()
 
-coach_instructions = "You are a personal diabetes coach. Give healthy and diabetes-proof suggestions to patients and incorporate their preferences."
+coach_instructions = "You are a personal diabetes coach. Give healthy and diabetes-proof suggestions to patients and incorporate their preferences. Be brief and limit the advice given."
 
 # First instantiate the assistant
 assistant = client.beta.assistants.create(
@@ -71,31 +72,47 @@ assistant = client.beta.assistants.create(
 thread = client.beta.threads.create()
 
 # Instantiate the user
-floris = User(
+larry = User(
     idx="42",
-    name="Floris",
+    name="Larry",
     # should be query from brain/knowledge graph
-    likes=['turkey', 'gingerbread', 'christmas cookie', 'movies', 'running',],
-    dislikes=['salad', 'cake', 'going to the gym',]
+    likes=['smoking', 'eating',],
+    dislikes=['excercise', 'monitoring blood sugar', 'sleeping normal hours']
+)
+funnyxxx = User(
+    idx="42",
+    name="Funnyxxx",
+    # should be query from brain/knowledge graph
+    likes=['',],
+    dislikes=['']
 )
 
 user_prompt = ""
 while "bye" not in user_prompt.lower():
-    # I'd like to bake something. Can you give me a recipe?
-    # I don't feel like watching a movie. How about something more active?
+    # Input 1. I'd like to bake something. Can you give me a recipe?
+    # Input 2. Looks like too much of a hassle. How about some other nice activity to do while its raining?
+    # Input 3. Sounds like a great plan. Bye now!
     user_prompt = input("> ")
     message = client.beta.threads.messages.create(
         thread_id=thread.id,
         role="user",
-        content=user_prompt
+        content=user_prompt,
+
     )
 
     # Create a single conversation -- called a run in openai.
     # We can inject preferences into the instructions here.
-    likes = ''.join(floris.get_likes())
-    coach_instructions += f"Address the user as {floris.name} and incorporate the users' preferences. "
-    coach_instructions += f"The user likes :{''.join(floris.get_likes())}"
-    coach_instructions += f"The user dislikes :{''.join(floris.get_dislikes())}"
+    user = funnyxxx
+    likes = ''.join(user.get_likes())
+    coach_instructions += f"Address the user as {user.name} and incorporate the users' preferences. If these are not known, ask for them."
+    if len(user.get_likes()) == 0:
+        coach_instructions += "It is not known what the user likes."
+    else:
+        coach_instructions += f"The user likes :{''.join(user.get_likes())}"
+    if len(user.get_dislikes()) == 0:
+        coach_instructions += "It is not known what the user dislikes."
+    else:
+        coach_instructions += f"The user dislikes :{''.join(user.get_dislikes())}"
 
     run = client.beta.threads.runs.create(
         thread_id=thread.id,
